@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clicking Simulator vs Bot</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      margin-top: 50px;
+    }
+    .clickArea {
+      width: 300px;
+      height: 200px;
+      margin: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    #userClickArea {
+      background-color: lightblue;
+    }
+    #botClickArea {
+      background-color: lightcoral;
+    }
+    #clickCount {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+    #botDifficulty {
+      margin-top: 20px;
+    }
+    #autoClicker {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      cursor: pointer;
+    }
+    #discordLink {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<img id="autoClicker" src="assets/discord_logo.png" alt="Auto Clicker" width="50" height="50" onclick="toggleAutoClicker()">
+
+<div id="userClickArea" class="clickArea" onclick="userClickHandler()">
+  <h2>Your Click Area</h2>
+  <p id="userClickCount">Click Count: 0</p>
+</div>
+
+<div id="botClickArea" class="clickArea">
+  <h2>Bot's Click Area</h2>
+  <p id="botClickCount">Click Count: 0</p>
+</div>
+
+<div id="botDifficulty">
+  <label for="difficulty">Select Bot Difficulty:</label>
+  <select id="difficulty" onchange="changeDifficulty()">
+    <option value="kid">Kid (4.5 c/s)</option>
+    <option value="nonGamer">Non-Gamer (7 c/s)</option>
+    <option value="tryhard">Tryhard (19 c/s)</option>
+    <option value="insane">Insane (26 c/s)</option>
+  </select>
+</div>
+
+<div id="autoClickerConfig">
+  <label for="autoClickerRate">Auto-Clicker Rate (c/s):</label>
+  <input type="number" id="autoClickerRate" value="10">
+  <button onclick="updateAutoClickerRate()">Apply</button>
+</div>
+
+<a id="discordLink" href="https://discord.gg/zQA5e5mspR" target="_blank">Join Discord</a>
+
+<script>
+  let userClickCount = 0;
+  let botClickCount = 0;
+  let botClickRate = 0;
+  let botIntervalId;
+  let autoClickerIntervalId;
+  let autoClickerActive = false;
+  let autoClickerRate = 10; // Default rate
+
+  function userClickHandler() {
+    userClickCount++;
+    updateClickCount("user");
+  }
+
+  function updateClickCount(player) {
+    const clickCountElement = document.getElementById(`${player}ClickCount`);
+    clickCountElement.innerText = `Click Count: ${player === "user" ? userClickCount : botClickCount}`;
+  }
+
+  function changeDifficulty() {
+    clearInterval(botIntervalId);
+    const difficulty = document.getElementById("difficulty").value;
+    switch (difficulty) {
+      case "kid":
+        botClickRate = 4.5;
+        break;
+      case "nonGamer":
+        botClickRate = 7;
+        break;
+      case "tryhard":
+        botClickRate = 19;
+        break;
+      case "insane":
+        botClickRate = 26;
+        break;
+      default:
+        botClickRate = 0;
+    }
+    startBot();
+  }
+
+  function startBot() {
+    botIntervalId = setInterval(() => {
+      botClickCount += botClickRate;
+      updateClickCount("bot");
+    }, 1000);
+  }
+
+  function toggleAutoClicker() {
+    autoClickerActive = !autoClickerActive;
+    if (autoClickerActive) {
+      autoClickerIntervalId = setInterval(() => {
+        userClickHandler();
+      }, 1000 / autoClickerRate);
+    } else {
+      clearInterval(autoClickerIntervalId);
+    }
+  }
+
+  function updateAutoClickerRate() {
+    autoClickerRate = parseFloat(document.getElementById("autoClickerRate").value);
+    if (autoClickerActive) {
+      clearInterval(autoClickerIntervalId);
+      autoClickerIntervalId = setInterval(() => {
+        userClickHandler();
+      }, 1000 / autoClickerRate);
+    }
+  }
+
+  // Initial setup
+  changeDifficulty();
+</script>
+
+</body>
+</html>
